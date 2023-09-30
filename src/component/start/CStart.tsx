@@ -1,55 +1,119 @@
 'use client'
-import { useCallback, useContext, useEffect, useRef, useState } from "react"
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
 import styles from "./CStart.module.css"
 import CButton from "../CButton"
 import CInput from "../CInput"
 import { BaseSettingProps, CtxSettingProps, SettingProps } from "@/store/SettingProp"
-import useBeat, { BeatState, StrokeAction } from "./useBeat"
+import useBeat, { BeatState, StrokeAction } from "./BeatFactory"
+import { BaseRunningStatusProps, RunningStatus, ctxRunningStatusStore } from "@/store/StatusStore"
+import TimeRuner, { ExecState } from "./timeRuner"
+import StatusDecorator from "./statusDecorator"
+
 
 const CStart = ()=>{
-    let ctx  = useContext(CtxSettingProps)
+    let ctxSettingProps  = useContext(CtxSettingProps)
+    let ctxRunningStatus  = useContext(ctxRunningStatusStore)
+    let intervalRef = useRef<NodeJS.Timeout>()
+
     let [settingProps,setSettingProps] = useState<SettingProps>(BaseSettingProps)
+    let [ticktakSource, setTicktakSource] = useState<HTMLAudioElement|null>(null)
+    let [runningStatusProps,setRunningStatusProps] = useState<RunningStatus>(BaseRunningStatusProps)
     useEffect(()=>{
-        ctx.registry(_props=>{
+        ctxSettingProps.registry(_props=>{
             setSettingProps(_props)
         })
+        ctxRunningStatus.registry(_props=>{
+            setRunningStatusProps(_props)
+        })
+    },[ctxSettingProps,ctxRunningStatus])
+
+    useEffect(()=>{
+        setTicktakSource(new Audio("tick-tak.mp3"))
     },[])
-    const [beatState, beatAction] = useBeat(settingProps)
-    let song = new Audio("tick-tak.mp3");
+    const [execState, currentBeat, cacheBeat, timeRunerAction] = TimeRuner(settingProps,runningStatusProps)
+    const statusAction = StatusDecorator(ctxRunningStatus)
 
     const EdgeLevelRangeInputRef = useRef<HTMLInputElement>(null)
 
-    
+   
     useEffect(()=>{
-        console.log("beatState",beatState)
-    },[beatState])
-
-    useEffect(()=>{
-        let interval = setInterval(()=>{
-            if(beatState.action == StrokeAction.Stroke || beatState.action == StrokeAction.Torture ){
-                song.muted = false
-                console.log("interval",song.muted)
-                song.pause();
-                song.volume = 1
-                song.currentTime = 0;
-                song.play()
-            }else{
-                song.muted = true
-                song.pause();
+        const reset = ()=>{
+            if(ticktakSource != null){
+                ticktakSource.currentTime = 10;
             }
-        },2000*(30/beatState.beat))
-        return ()=>{
-            song.currentTime = 0;
-            console.log("clearInterval",song.muted)
-            clearInterval(interval)
+            console.log("clearInterval")
+            clearInterval(intervalRef.current)
         }
-    },[beatState,song])
+        reset()
+        if(currentBeat == null){
+            return reset
+        }
 
-    let doChangeEdgeLevel = useCallback(()=>{
+        if(execState == ExecState.Stop || execState == ExecState.Pause){
+            return reset
+        } 
+        let interval = setInterval(()=>{
+            if(ticktakSource == null){
+                return
+            }
+            if(currentBeat?.action == StrokeAction.Stroke || currentBeat?.action == StrokeAction.Torture ){
+                ticktakSource.muted = false
+                ticktakSource.pause();
+                ticktakSource.volume = 1
+                ticktakSource.currentTime = 0;
+                ticktakSource.play()
+            }else{
+                ticktakSource.muted = true
+                ticktakSource.pause();
+            }
+        },2000*(30/currentBeat.beat))
+        intervalRef.current = interval
+        return reset
+    },[currentBeat, execState, ticktakSource])
+
+    let doChangeEdgeLevel = useCallback((e: React.ChangeEvent<HTMLInputElement>)=>{
         if( EdgeLevelRangeInputRef.current != undefined){
-            beatAction.setEdgeLevel(Number(EdgeLevelRangeInputRef.current.value))
+            statusAction.setEdgeLevel(Number(EdgeLevelRangeInputRef.current.value))
         }
-    },[song,EdgeLevelRangeInputRef,beatAction])
+    },[statusAction])
+
+
+    let doEdge = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+        statusAction.addEdge()
+        timeRunerAction.Edge()
+        if (EdgeLevelRangeInputRef.current) {
+            EdgeLevelRangeInputRef.current.value = "100"
+        }
+    },[statusAction, timeRunerAction])
+
+
+    let doOrgams = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+        statusAction.addOrgams()
+        timeRunerAction.Orgams()
+        if (EdgeLevelRangeInputRef.current) {
+            EdgeLevelRangeInputRef.current.value = "0"
+        }
+    },[statusAction, timeRunerAction])
+
+    let doRun = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+        statusAction.start()
+        timeRunerAction.Start()
+    },[statusAction, timeRunerAction])
+
+    let doPause = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+        timeRunerAction.Pause()
+    },[timeRunerAction])
+
+
+    let doResume = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+        timeRunerAction.Resume()
+    },[timeRunerAction])
+
+
+    let doStop = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+        timeRunerAction.Stop()
+        statusAction.stop()
+    },[statusAction, timeRunerAction])
 
     return <>
         <div>
@@ -57,37 +121,42 @@ const CStart = ()=>{
                 <div className={`${styles["row"]}`}>
                     <div className={`${styles["beatblock"]}`}>
                         <label>beat</label>
-                        <div>{beatState.beat}</div>
+                        <div>{currentBeat?.beat}</div>
+                    </div>
+                    <div className={`${styles["beatblock"]}`}>
+                        <label>動作</label>
+                        <div>{currentBeat?.action == StrokeAction.NotStroke && "手停下"}</div>
+                        <div>{currentBeat?.action == StrokeAction.Stroke && "繼續"}</div>
+                        <div>{currentBeat?.action == StrokeAction.Torture && "強迫"}</div>
+                        <div>{currentBeat?.action == StrokeAction.Relex && "休息"}</div>
                     </div>
                     <div className={`${styles["beatblock"]}`}>
                         <label>狀態</label>
-                        <div>{beatState.action == StrokeAction.NotStroke && "手停下"}</div>
-                        <div>{beatState.action == StrokeAction.Stroke && "繼續"}</div>
-                        <div>{beatState.action == StrokeAction.Pause && "站停"}</div>
-                        <div>{beatState.action == StrokeAction.Stop && "停止"}</div>
-                        <div>{beatState.action == StrokeAction.Torture && "強迫"}</div>
-                        <div>{beatState.action == StrokeAction.Relex && "休息"}</div>
+                        <div>{execState == ExecState.Pause && "暫停"}</div>
+                        <div>{execState == ExecState.Stop && "停止"}</div>
+                        <div>{execState == ExecState.Run && "運作"}</div>
                     </div>
                 </div>
-                <CButton onClick={(e) => { beatAction.Start() } } label={"開始"}/>
-                {(beatState.action == StrokeAction.Stroke  || beatState.action == StrokeAction.NotStroke )&& <CButton onClick={(e) => { beatAction.Pause() } } label={"暫停"}/>}
-                {(beatState.action == StrokeAction.Pause ) && <CButton onClick={(e) => {  beatAction.Resume() } } label={"繼續"}/>}
-                <CButton onClick={(e) => { beatAction.Stop() } } label={"結束"}/>
-                <CInput type="range" max={8} min={1} onChange={e=>{
-                    doChangeEdgeLevel();
-                }}inputRef={EdgeLevelRangeInputRef} label={"EdgeLevel"} ></CInput>
-                <CButton onClick={e=>{
-                    beatAction.setEdge();
-                    if (EdgeLevelRangeInputRef.current) {
-                        EdgeLevelRangeInputRef.current.value = "100"
-                    }
-                }} label={"Edge"} ></CButton>
-                <CButton onClick={e=>{beatAction.setOrgams()}} label={"Orgams"} ></CButton>
+                <CButton onClick={doRun} label={"開始"}/>
+                <CButton onClick={doPause} disabled={execState != ExecState.Run} label={"暫停"}/>
+                <CButton onClick={doResume} disabled={execState != ExecState.Pause}  label={"繼續"}/>
+                <CButton onClick={doStop} label={"結束"}/>
+                <CInput type="range" max={8} min={1} onChange={doChangeEdgeLevel} inputRef={EdgeLevelRangeInputRef} label={"EdgeLevel"} ></CInput>
+                <CButton onClick={doEdge} label={"Edge"} ></CButton>
+                <CButton onClick={doOrgams} label={"Orgams"} ></CButton>
             </div>
             <div>
-                {beatState != undefined && Object.keys(beatState).map( (key )  => {
-                    return <p>{key}:{beatState != undefined && beatState[key as keyof BeatState]}</p>
+                {currentBeat != undefined && Object.keys(currentBeat).map( (key,i )  => {
+                    return <p key={"beatStatus-"+key}>
+                            {key}:{currentBeat != undefined && currentBeat[key as keyof BeatState]}
+                        </p>
                 })}
+            </div>
+            <div>
+                {JSON.stringify(cacheBeat)}
+            </div>
+            <div>
+                {JSON.stringify(runningStatusProps)}
             </div>
         </div>
     

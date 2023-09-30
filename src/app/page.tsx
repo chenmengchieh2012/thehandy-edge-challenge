@@ -8,6 +8,7 @@ import CSetting from '@/component/setting/CSetting'
 import CInfo from '@/component/info/CInfo'
 import CStart from '@/component/start/CStart'
 import { useEffect } from 'react'
+import VRunningStatusContext from '@/store/StatusStore'
 
 export default function Home() {
 
@@ -23,21 +24,23 @@ export default function Home() {
       <div  className={`${styles["body"]}`}>
         <VTagContext>
           <VSettingPropsContext>
-          <>
-          <div className={`${styles["left"]}`}>
-              <CTab icon={"IoSettingsOutline"} TagName={TagName__Setting}></CTab>
-              <CTab  icon={"IoCaretForwardOutline"} TagName={TagName__Starting}></CTab>
-              <CInfo/>
-          </div>
-          <div className={`${styles["right"]}`}>
-          <CTabBody TagName={TagName__Setting}>
-            <CSetting/>
-          </CTabBody>
-          <CTabBody TagName={TagName__Starting}>
-            <CStart/>
-          </CTabBody>
-          </div>
-          </>
+          <VRunningStatusContext>
+            <>
+            <div className={`${styles["left"]}`}>
+                <CTab icon={"IoSettingsOutline"} TagName={TagName__Setting}></CTab>
+                <CTab  icon={"IoCaretForwardOutline"} TagName={TagName__Starting}></CTab>
+                <CInfo/>
+            </div>
+            <div className={`${styles["right"]}`}>
+            <CTabBody TagName={TagName__Setting}>
+              <CSetting/>
+            </CTabBody>
+            <CTabBody TagName={TagName__Starting}>
+              <CStart/>
+            </CTabBody>
+            </div>
+            </>
+          </VRunningStatusContext>
           </VSettingPropsContext>
         </VTagContext>
       </div>
