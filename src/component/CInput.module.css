@@ -1,0 +1,27 @@
+.cinput {
+    display:  block;
+}
+.cinput>label {
+    font-size:1.0rem;
+    display:  block;
+    padding: 0.5rem;
+    color: var(--standards-coffee03);
+}
+.cinput>label::after {
+    content: " :";
+}
+.cinput>input {
+    font-size: 1rem;
+    border: unset;
+    border-bottom: 2px solid var(--standards-coffee02);
+    margin: 0.5rem;
+
+}
+
+.cinput>:focus{
+    outline: none;
+    border-bottom: 2px solid var(--standards-coffee01);
+}
+.cinput>input:active {
+    border-bottom: 2px solid var(--standards-coffee01);
+}

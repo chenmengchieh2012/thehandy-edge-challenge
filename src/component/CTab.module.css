@@ -1,0 +1,31 @@
+.tabbody>.label{
+    color: var(--standards-khaki01)
+}
+.tabs{
+    width: 100%;
+    display: block;
+    text-align: center;
+}
+.tab{
+    width: 100%;
+    padding: 0.5rem 0rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--standards-khaki01);
+    border-radius: 0.5rem;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+.tab:hover{
+    background-color: var(--standards-khaki02);
+}
+.tab:active{
+    box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
+}
+.tab>label{
+    display: inline-block;
+    vertical-align: middle;
+}
+.tab>svg{
+    display: inline-block;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}

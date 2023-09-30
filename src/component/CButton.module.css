@@ -1,0 +1,15 @@
+
+.cbutton{
+    display: inline-block;
+    border: unset;
+    padding: 0.5rem 1.5rem;
+    background-color: var(--standards-green01);
+    border-radius: 0.5rem;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+.cbutton:hover{
+    background-color: var(--standards-green02);
+}
+.cbutton:active{
+    box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
+}

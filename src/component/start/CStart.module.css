@@ -1,0 +1,24 @@
+.container{
+    display: block;
+}
+
+.row {
+    display: block;
+}
+.beatblock {
+    width: 120px;
+    height: 120px;
+    margin: 0.5rem;
+    border: 1px solid var(--standards-coffee03);
+    border-radius: 0.5rem;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.beatblock>label {
+    display: block;
+}
+.beatblock>div {
+    display: block;
+    font-size: 2rem;
+}
