@@ -2,7 +2,7 @@ import { InputHTMLAttributes } from "react"
 import styles from "./CInput.module.css"
 export interface CInputProps extends React.InputHTMLAttributes<HTMLInputElement>{
     label: any
-    className: string
+    className?: string
     inputRef: React.Ref<HTMLInputElement>
 }
 const CInput = (props: CInputProps)=>{
