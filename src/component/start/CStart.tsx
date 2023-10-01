@@ -72,6 +72,7 @@ const CStart = ()=>{
         } 
         let playIndex = 0
         let interval = setInterval(()=>{
+            playIndex += 1
             console.log("play")
             if( audioRef.current.length < MAXAUDIOTAG ){
                 return
