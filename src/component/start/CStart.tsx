@@ -35,6 +35,7 @@ const CStart = ()=>{
     useEffect(()=>{
         let audio = new Audio()
         audio.src = "tick-tak.mp3"
+        audio.autoplay = true;
         audio.load()
         setTicktakSource(audio)
     },[])
