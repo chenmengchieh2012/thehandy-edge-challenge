@@ -18,7 +18,7 @@ import { MAX_EDGE_LEVEL } from "./statusDecorator"
 // MaxStopPeriod: number
 
 export enum StrokeAction {
-    Stroke, NotStroke, Torture, Relex
+    Stroke, NotStroke, Edge, Torture, Relex
 }
 
 export enum BeatMode {
@@ -47,7 +47,8 @@ const BaseBeatState:BeatState = {
 
 const BeatFactory = (ctx: SettingProps, status: RunningStatus): UseBeatAction=>{
     
-    let createNormalBeatState = useCallback((): BeatState=>{
+    let createNormalBeatState = (): BeatState=>{
+        console.log("callback 2",status)
         let action = StrokeAction.Stroke
         let beat = 30
         let period = 1
@@ -69,8 +70,12 @@ const BeatFactory = (ctx: SettingProps, status: RunningStatus): UseBeatAction=>{
 
         let duration = new Date().getTime() - status.startTime
 
-        if( duration/1000/60 > ctx.PreferOrgasmPeriod ){
+        if( duration/1000/60 > ctx.PreferOrgasmPeriod){
             beat = ctx.MaxBeatInput - (totalSteps-nextStep)*ctx.BeatsStepSize
+        }
+
+        if( action == StrokeAction.NotStroke){
+            beat = 0
         }
 
         
@@ -85,9 +90,9 @@ const BeatFactory = (ctx: SettingProps, status: RunningStatus): UseBeatAction=>{
         return {
             action,beat,period
         }
-    },[ctx, status])
+    }
 
-    let createOrgasmBeatState = useCallback((): BeatState=>{
+    let createOrgasmBeatState = (): BeatState=>{
         
         let action = StrokeAction.Torture
         let beat = POST_ORGAME_BEATS
@@ -98,19 +103,19 @@ const BeatFactory = (ctx: SettingProps, status: RunningStatus): UseBeatAction=>{
         return {
             action,beat,period
         }
-    },[ctx])
+    }
 
-    let createRelexBeatState = useCallback((): BeatState=>{
+    let createRelexBeatState = (): BeatState=>{
         let action = StrokeAction.Relex
         let beat =  0
         let period =  ctx.RelexPeriod*60
         return {
             action,beat,period
         }
-    },[ctx])
+    }
 
-    let createEdgeBeatState = useCallback(():BeatState=>{
-        let action =StrokeAction.NotStroke
+    let createEdgeBeatState = ():BeatState=>{
+        let action = StrokeAction.Edge
         let randNum = Math.random()
         let periodRange = ctx.MaxStopPeriod- ctx.MinStopPeriod
         let beat = 0
@@ -118,10 +123,10 @@ const BeatFactory = (ctx: SettingProps, status: RunningStatus): UseBeatAction=>{
         return {
             action,beat,period
         }
-    },[ctx])
+    }
 
 
-    let CreateBeatStatus = useCallback((mode: BeatMode):BeatState=>{
+    let CreateBeatStatus = (mode: BeatMode):BeatState=>{
         let retBeatState:BeatState = BaseBeatState
         switch(mode){
             case BeatMode.Normal:
@@ -138,7 +143,7 @@ const BeatFactory = (ctx: SettingProps, status: RunningStatus): UseBeatAction=>{
                 break
         }
         return retBeatState
-    },[createEdgeBeatState, createNormalBeatState, createOrgasmBeatState, createRelexBeatState])
+    }
     
     return  { CreateBeatStatus }
     // let nextBeatState = useCallback((force?: boolean)=>{

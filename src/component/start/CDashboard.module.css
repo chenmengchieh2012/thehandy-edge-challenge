@@ -1,0 +1,52 @@
+
+.beatblock {
+    --beatBlock-height: 80px;
+    --beatBlock-labelheight: 24px;
+    width: 120px;
+    height: var(--beatBlock-height);
+    border: 1px solid var(--standards-coffee03);
+    border-radius: 0.5rem;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.beatblock>label {
+    display: block;
+    height: var(--beatBlock-labelheight);
+}
+.beatblock>div {
+    display: block;
+    height: calc( var(--beatBlock-height) - var(--beatBlock-labelheight) );
+    font-size: 2rem;
+}
+.period {
+    display: inline-block;
+    font-size: 1rem;
+}
+
+
+@media only screen and (max-width: 600px) {
+    .beatblock {
+        --beatBlock-height: 40px;
+        width: 100%;
+        height: var(--beatBlock-height);
+        border: 1px solid var(--standards-coffee03);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .beatblock>label {
+        flex: 1;
+        height: fit-content;
+    }
+    .beatblock>div {
+        flex: 3;
+        height: fit-content;
+        font-size: 1.5rem;
+    }
+    .period {
+        display: inline-block;
+        font-size: 1rem;
+    }
+}

@@ -1,19 +1,24 @@
 'use client'
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
 import styles from "./CStart.module.css"
-import CButton from "../CButton"
+import CButton, { ButtonMode } from "../CButton"
 import CInput from "../CInput"
 import { BaseSettingProps, CtxSettingProps, SettingProps } from "@/store/SettingProp"
-import useBeat, { BeatState, StrokeAction } from "./BeatFactory"
+import { BeatState, StrokeAction } from "./BeatFactory"
 import { BaseRunningStatusProps, RunningStatus, ctxRunningStatusStore } from "@/store/StatusStore"
 import TimeRuner, { ExecState } from "./timeRuner"
 import StatusDecorator from "./statusDecorator"
+import { IoPauseOutline, IoPlayForwardOutline, IoPlayOutline, IoRocketOutline, IoStopOutline, IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5"
+import CDashBoard from "./CDashboard"
+import CCacheList from "./CCacheList"
+import CLog, { FCLog } from "./CLog"
 
 
 const CStart = ()=>{
     let ctxSettingProps  = useContext(CtxSettingProps)
     let ctxRunningStatus  = useContext(ctxRunningStatusStore)
     let intervalRef = useRef<NodeJS.Timeout>()
+    let cLogRef = useRef<FCLog>(null)
 
     let [settingProps,setSettingProps] = useState<SettingProps>(BaseSettingProps)
     let [ticktakSource, setTicktakSource] = useState<HTMLAudioElement|null>(null)
@@ -35,6 +40,10 @@ const CStart = ()=>{
 
     const EdgeLevelRangeInputRef = useRef<HTMLInputElement>(null)
 
+    let [ forceMute, setForceMute ] = useState<boolean>(false)
+
+
+
    
     useEffect(()=>{
         const reset = ()=>{
@@ -53,11 +62,11 @@ const CStart = ()=>{
             return reset
         } 
         let interval = setInterval(()=>{
-            if(ticktakSource == null){
+            if( ticktakSource == null ){
                 return
             }
-            if(currentBeat?.action == StrokeAction.Stroke || currentBeat?.action == StrokeAction.Torture ){
-                ticktakSource.muted = false
+            if( currentBeat?.action == StrokeAction.Stroke || currentBeat?.action == StrokeAction.Torture ){
+                ticktakSource.muted = forceMute ? true : false
                 ticktakSource.pause();
                 ticktakSource.volume = 1
                 ticktakSource.currentTime = 0;
@@ -69,7 +78,7 @@ const CStart = ()=>{
         },2000*(30/currentBeat.beat))
         intervalRef.current = interval
         return reset
-    },[currentBeat, execState, ticktakSource])
+    },[currentBeat, execState, ticktakSource,forceMute])
 
     let doChangeEdgeLevel = useCallback((e: React.ChangeEvent<HTMLInputElement>)=>{
         if( EdgeLevelRangeInputRef.current != undefined){
@@ -115,48 +124,52 @@ const CStart = ()=>{
         statusAction.stop()
     },[statusAction, timeRunerAction])
 
+
+    let doForceMute = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+        setForceMute(b=>!b)
+    },[])
+
     return <>
         <div>
             <div className={`${styles["container"]}`}>
                 <div className={`${styles["row"]}`}>
-                    <div className={`${styles["beatblock"]}`}>
-                        <label>beat</label>
-                        <div>{currentBeat?.beat}</div>
-                    </div>
-                    <div className={`${styles["beatblock"]}`}>
-                        <label>動作</label>
-                        <div>{currentBeat?.action == StrokeAction.NotStroke && "手停下"}</div>
-                        <div>{currentBeat?.action == StrokeAction.Stroke && "繼續"}</div>
-                        <div>{currentBeat?.action == StrokeAction.Torture && "強迫"}</div>
-                        <div>{currentBeat?.action == StrokeAction.Relex && "休息"}</div>
-                    </div>
-                    <div className={`${styles["beatblock"]}`}>
-                        <label>狀態</label>
-                        <div>{execState == ExecState.Pause && "暫停"}</div>
-                        <div>{execState == ExecState.Stop && "停止"}</div>
-                        <div>{execState == ExecState.Run && "運作"}</div>
+                    <CDashBoard fCLog={cLogRef} execState={execState} currentBeat={currentBeat} runningStatus={runningStatusProps} ></CDashBoard>
+                </div>
+                <div className={`${styles["row"]}`}>
+                    <div className={`${styles["status-btns"]}`}>
+                        <CButton mode={ButtonMode.Success} onClick={doEdge} label={"Edge"} ></CButton>
+                        <CButton mode={ButtonMode.Alert} onClick={doOrgams} label={"Orgams"} ></CButton>
                     </div>
                 </div>
-                <CButton onClick={doRun} label={"開始"}/>
-                <CButton onClick={doPause} disabled={execState != ExecState.Run} label={"暫停"}/>
-                <CButton onClick={doResume} disabled={execState != ExecState.Pause}  label={"繼續"}/>
-                <CButton onClick={doStop} label={"結束"}/>
-                <CInput type="range" max={8} min={1} onChange={doChangeEdgeLevel} inputRef={EdgeLevelRangeInputRef} label={"EdgeLevel"} ></CInput>
-                <CButton onClick={doEdge} label={"Edge"} ></CButton>
-                <CButton onClick={doOrgams} label={"Orgams"} ></CButton>
+                <div className={`${styles["row"]}`}>
+                    <div className={`${styles["running-btns"]}`}>
+                        <CButton onClick={doForceMute} label={
+                            forceMute ? <IoVolumeMuteOutline/> : <IoVolumeHighOutline/> 
+                        } ></CButton>
+                        <CButton onClick={doRun} label={<IoPlayOutline/>}/>
+                        <CButton onClick={doPause} disabled={execState != ExecState.Run} label={<IoPauseOutline/>}/>
+                        <CButton onClick={doResume} disabled={execState != ExecState.Pause}  label={<IoPlayForwardOutline/>}/>
+                        <CButton onClick={doStop} label={<IoStopOutline/>}/>
+                    </div>
+                </div>
+                <div className={`${styles["row"]}`}>
+                    <CInput 
+                        className={`${styles["edge-level"]}`} type="range" 
+                        max={8} min={1} onChange={doChangeEdgeLevel} 
+                        inputRef={EdgeLevelRangeInputRef} 
+                        label={<IoRocketOutline/>} >
+                    </CInput>
+                </div>
             </div>
-            <div>
-                {currentBeat != undefined && Object.keys(currentBeat).map( (key,i )  => {
-                    return <p key={"beatStatus-"+key}>
-                            {key}:{currentBeat != undefined && currentBeat[key as keyof BeatState]}
-                        </p>
-                })}
-            </div>
-            <div>
-                {JSON.stringify(cacheBeat)}
-            </div>
-            <div>
-                {JSON.stringify(runningStatusProps)}
+            <div className={`${styles["body"]}`}>
+                <div className={`${styles["left"]}`}> 
+                    <div className={`${styles["left-label"]}`}>Next: </div>
+                    <CCacheList cacheBeat={cacheBeat} ></CCacheList>
+                </div>
+                <div className={`${styles["right"]}`}> 
+                    <div className={`${styles["right-label"]}`}>History: </div>
+                    <CLog ref={cLogRef}></CLog>
+                </div>
             </div>
         </div>
     

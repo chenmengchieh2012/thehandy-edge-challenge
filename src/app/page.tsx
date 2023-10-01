@@ -9,6 +9,7 @@ import CInfo from '@/component/info/CInfo'
 import CStart from '@/component/start/CStart'
 import { useEffect } from 'react'
 import VRunningStatusContext from '@/store/StatusStore'
+import CNav from '@/component/CNav'
 
 export default function Home() {
 
@@ -27,9 +28,13 @@ export default function Home() {
           <VRunningStatusContext>
             <>
             <div className={`${styles["left"]}`}>
-                <CTab icon={"IoSettingsOutline"} TagName={TagName__Setting}></CTab>
-                <CTab  icon={"IoCaretForwardOutline"} TagName={TagName__Starting}></CTab>
-                <CInfo/>
+                <CNav>
+                  <>
+                  <CTab icon={"IoSettingsOutline"} TagName={TagName__Setting}></CTab>
+                  <CTab  icon={"IoCaretForwardOutline"} TagName={TagName__Starting}></CTab>
+                  <CInfo/>
+                  </>
+                </CNav>
             </div>
             <div className={`${styles["right"]}`}>
             <CTabBody TagName={TagName__Setting}>

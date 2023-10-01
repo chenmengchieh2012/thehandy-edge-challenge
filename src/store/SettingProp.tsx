@@ -36,11 +36,11 @@ export const BaseSettingProps = {
     RelexPeriod :10,
     PostOrgasmTortureMinPeriod: 20,
     PostOrgasmTortureMaxPeriod: 40,
-    MinBeatInput: 100,
-    MaxBeatInput: 340,
-    BeatsStepSize: 80,
-    MinStrokePeriod: 8,
-    MaxStrokePeriod: 12,
+    MinBeatInput: 60,
+    MaxBeatInput: 200,
+    BeatsStepSize: 1,
+    MinStrokePeriod: 4,
+    MaxStrokePeriod: 15,
     MinStopPeriod: 20,
     MaxStopPeriod: 40,
 }
@@ -50,13 +50,13 @@ const VSettingPropsContext = (props: {children: JSX.Element })=>{
     let registryRef = useRef<((props: SettingProps)=>void)[]>([])
     let registry = useCallback((cb: Func_SettingPropsRegistry)=>{
         registryRef.current.push(cb)
-    },[])
+    },[registryRef])
     let setSettingProps = useCallback((tag: SettingProps)=>{
         registryRef.current.forEach(cb=>{
             cb(tag)
         })
         settingPropsRef.current = tag
-    },[])
+    },[settingPropsRef,registryRef])
     let getSettingProps = useCallback(():SettingProps=>{
         return settingPropsRef.current
     },[])

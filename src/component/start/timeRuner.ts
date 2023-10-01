@@ -1,7 +1,9 @@
 import { SettingProps } from "@/store/SettingProp"
 import { RunningStatus } from "@/store/StatusStore"
-import { useCallback, useEffect, useRef, useState } from "react"
-import BeatFactory, { BeatMode, BeatState } from "./BeatFactory"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import BeatFactory, { BeatMode, BeatState, StrokeAction } from "./BeatFactory"
+import { PeriodSpeed } from "../utils"
+import { FCLog } from "./CLog"
 
 export enum ExecState {
     Run, Stop, Pause
@@ -18,44 +20,59 @@ interface TimeRunerAction {
 
 let CATCH_SIZE = 5
 
-const TimeRuner = (ctx: SettingProps, status: RunningStatus):[ ExecState , BeatState|null, BeatState[], TimeRunerAction] =>{
+const TimeRuner = (
+        ctx: SettingProps, 
+        status: RunningStatus
+    ):[ ExecState , BeatState|null, BeatState[], TimeRunerAction] =>{
     let pauseBeatRef = useRef<BeatState|null>()
     let lastTimeRef = useRef<number>(0)
     let [ execState, setExecState ] = useState(ExecState.Stop)
-
     const beatFactory = useRef(BeatFactory(ctx, status))
+    useEffect(()=>{
+        beatFactory.current = BeatFactory(ctx,status)
+    },[ctx, status])
 
     const [ cacheBeats , setCacheBeats ] = useState<BeatState[]>([])
     const [ currentBeat, setCurrentBeat ] = useState<BeatState|null>(null)
     const tic = useTimer(currentBeat)
 
     useEffect(()=>{
-        console.log("tic!!",cacheBeats.length)
-        if(cacheBeats.length > 0){
-            let nextCacheBeat = cacheBeats[0]
-            setCurrentBeat(nextCacheBeat)
-            console.log("nextCacheBeat!!",nextCacheBeat)
-            lastTimeRef.current = new Date().getTime()
-            cacheBeats.shift()
-            if(status.startTime > 0 && status.currentOrgasm < ctx.OrgamsTimes){
-                for(let i=cacheBeats.length;i<CATCH_SIZE;i++){
-                    let newBeatState = beatFactory.current.CreateBeatStatus(BeatMode.Normal)
-                    cacheBeats.push(newBeatState)
+        setCacheBeats(pre=>{
+            pre.forEach((beat,i) =>{
+                if( beat.action == StrokeAction.Stroke || beat.action == StrokeAction.NotStroke){
+                    pre[i] = beatFactory.current.CreateBeatStatus(BeatMode.Normal)
                 }
-                setCacheBeats(cacheBeats)
+            })
+            return pre
+        })
+    },[status.currentEdgeLevel])
+
+    useEffect(()=>{
+        if(cacheBeats.length > 0 && execState == ExecState.Run){
+            console.log("next",cacheBeats)
+            lastTimeRef.current = new Date().getTime()
+            setCurrentBeat(cacheBeats[0])
+            if(cacheBeats.length > 0){
+                cacheBeats.shift()
+                console.log("setCacheBeats 1",cacheBeats)
+                if(status.currentOrgasm < ctx.OrgamsTimes ){
+                    cacheBeats.push(beatFactory.current.CreateBeatStatus(BeatMode.Normal))
+                    setCacheBeats(cacheBeats)
+                }
             }
         }
-    },[beatFactory, cacheBeats, ctx.OrgamsTimes, status.currentOrgasm, status.startTime, tic])
+    },[cacheBeats, ctx.OrgamsTimes, execState, status.currentOrgasm, tic])
+
 
     let Start = useCallback(()=>{
         setExecState(ExecState.Run)
-        setCurrentBeat(beatFactory.current.CreateBeatStatus(BeatMode.Normal))
-        let cacheBeats: BeatState[] = [];
-        for (let i = 0; i < CATCH_SIZE; i++) {
-            let beatState = beatFactory.current.CreateBeatStatus(BeatMode.Normal)
-            cacheBeats.push(beatState)
+        let newCacheBeat: BeatState[] = []
+        for(let i=0;i<CATCH_SIZE;i++){
+            let newBeatState = beatFactory.current.CreateBeatStatus(BeatMode.Normal)
+            newCacheBeat.push(newBeatState)
         }
-        setCacheBeats(cacheBeats)
+        setCacheBeats(newCacheBeat)
+        setCurrentBeat(beatFactory.current.CreateBeatStatus(BeatMode.Normal))
     },[beatFactory])
 
     let Stop = useCallback(()=>{
@@ -68,30 +85,49 @@ const TimeRuner = (ctx: SettingProps, status: RunningStatus):[ ExecState , BeatS
     let Pause = useCallback(()=>{
         if(currentBeat != null){
             setExecState(ExecState.Pause)
-            let remainPeriod = (currentBeat.period - (new Date().getTime() - lastTimeRef.current))/1000
+            let remainPeriod = Math.trunc(currentBeat.period - (new Date().getTime() - lastTimeRef.current)/PeriodSpeed)
             pauseBeatRef.current = {...currentBeat, period: remainPeriod}
             setCurrentBeat(null)
         }
     },[currentBeat])
 
     let Resume = useCallback(()=>{
-        if(pauseBeatRef.current == null){
+        if(pauseBeatRef.current == null || pauseBeatRef.current == undefined){
             return
         }
-        setExecState(ExecState.Run)
+        lastTimeRef.current = new Date().getTime()
         setCurrentBeat(pauseBeatRef.current)
+        setExecState(ExecState.Run)
     },[])
 
     let Orgams = useCallback(()=>{
-        setCurrentBeat(beatFactory.current.CreateBeatStatus(BeatMode.Orgasm))
-        setCacheBeats([beatFactory.current.CreateBeatStatus(BeatMode.Relex)])
-    },[beatFactory])
+        if(execState == ExecState.Stop ){
+            return
+        }
+        setCurrentBeat(null)
+        let newCacheBeat: BeatState[] = [beatFactory.current.CreateBeatStatus(BeatMode.Orgasm),beatFactory.current.CreateBeatStatus(BeatMode.Relex)]
+        if( status.currentOrgasm < ctx.OrgamsTimes ){
+            for(let i=2;i<CATCH_SIZE;i++){
+                let newBeatState = beatFactory.current.CreateBeatStatus(BeatMode.Normal)
+                newCacheBeat.push(newBeatState)
+            }
+        }
+        setCacheBeats(newCacheBeat)
+    },[ctx.OrgamsTimes, execState, status.currentOrgasm])
 
 
     let Edge = useCallback(()=>{
-        setCurrentBeat(beatFactory.current.CreateBeatStatus(BeatMode.Edge))
-        setCacheBeats([])
-    },[beatFactory])
+        if(execState == ExecState.Stop ){
+            return
+        }
+        setCurrentBeat(null)
+        let newCacheBeat: BeatState[] = [beatFactory.current.CreateBeatStatus(BeatMode.Edge)]
+        for(let i=1;i<CATCH_SIZE;i++){
+            let newBeatState = beatFactory.current.CreateBeatStatus(BeatMode.Normal)
+            newCacheBeat.push(newBeatState)
+        }
+        setCacheBeats(newCacheBeat)
+    },[execState])
 
     return [execState, currentBeat, cacheBeats, { Start,Stop,Pause,Resume,Orgams,Edge}]
 
@@ -112,7 +148,7 @@ const useTimer = (currentBeatState : BeatState|null): boolean =>{
         }else{
             timerRef.current.forEach(t=>{ clearTimeout(t) })
             timerRef.current = []
-            timerRef.current.push(setTimeout(tictac,(currentBeatState.period+1)*100))
+            timerRef.current.push(setTimeout(tictac,(currentBeatState.period+1)*PeriodSpeed))
         }
     },[currentBeatState, tictac])
     return tic

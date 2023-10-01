@@ -4,21 +4,61 @@
 
 .row {
     display: block;
+    width: 100%;
 }
-.beatblock {
-    width: 120px;
-    height: 120px;
-    margin: 0.5rem;
-    border: 1px solid var(--standards-coffee03);
-    border-radius: 0.5rem;
+.row>* {
     display: inline-block;
-    text-align: center;
-    vertical-align: middle;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
 }
-.beatblock>label {
-    display: block;
+
+@media only screen and (max-width: 600px) {
+    .row>* {
+        display: flex;
+    }
 }
-.beatblock>div {
-    display: block;
-    font-size: 2rem;
+
+.edge-level {
+    width: 80%;
+}
+
+.body{
+    display: flex
+}
+
+.left{
+    flex: 1;
+    flex-basis: 200px;
+}
+.left-label{
+    margin-bottom: 0.4rem;
+}
+.right{
+    flex: 3;
+    height: 2rem; 
+    box-sizing: border-box
+}
+.right-label{
+    margin-bottom: 0.4rem;
+}
+
+@media only screen and (max-width: 600px) {
+    .body {
+        flex-direction: column;
+    }
+    .right{
+        flex: 1;
+        height: 0;
+    }
+}
+
+.status-btns>button{
+    padding:0.5rem 1rem;
+    margin-right: 0.3rem;
+}
+
+
+.running-btns>button{
+    padding:0.5rem 1rem;
+    margin-right: 0.3rem;
 }

@@ -1,12 +1,13 @@
 import { InputHTMLAttributes } from "react"
 import styles from "./CInput.module.css"
 export interface CInputProps extends React.InputHTMLAttributes<HTMLInputElement>{
-    label: string
+    label: any
+    className: string
     inputRef: React.Ref<HTMLInputElement>
 }
 const CInput = (props: CInputProps)=>{
     return <>
-        <div className={`${styles["cinput"]}`}>
+        <div className={`${props.className} ${styles["cinput"]}`}>
             <label>
                 {props.label}
             </label>

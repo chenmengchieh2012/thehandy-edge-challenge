@@ -1,10 +1,12 @@
 import { SettingProps } from "@/store/SettingProp"
 import { RunningStatus, RunningStatusAction } from "@/store/StatusStore"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export interface StatusDecoratorAction {
     start: ()=>void
     stop: ()=>void
+    pause: ()=>void
+    resume: ()=>void
     addOrgams: ()=>void
     addEdge: ()=>void
     setEdgeLevel: (edgeLevel: number)=>void
@@ -12,6 +14,7 @@ export interface StatusDecoratorAction {
 export const MAX_EDGE_LEVEL = 8
 
 const StatusDecorator = (ctx: RunningStatusAction):StatusDecoratorAction =>{
+    let pauseTimeRef = useRef<number>(0)
     let start  = useCallback(()=>{
         ctx.setStatus(prevStatus=>{
             prevStatus.startTime = new Date().getTime()
@@ -24,6 +27,16 @@ const StatusDecorator = (ctx: RunningStatusAction):StatusDecoratorAction =>{
             prevStatus.currentEdgeLevel = 1
             prevStatus.currentOrgasm = 0
             prevStatus.currentEdgeTimes = 0
+            return {...prevStatus}
+        })
+    },[ctx])
+    let pause = useCallback(()=>{
+        pauseTimeRef.current = new Date().getTime()
+    },[])
+    let resume = useCallback(()=>{
+        let duration = new Date().getTime() - pauseTimeRef.current 
+        ctx.setStatus(prevStatus=>{
+            prevStatus.startTime = prevStatus.startTime + duration
             return {...prevStatus}
         })
     },[ctx])
@@ -49,7 +62,7 @@ const StatusDecorator = (ctx: RunningStatusAction):StatusDecoratorAction =>{
     },[ctx])
 
     return {
-        start,stop,addEdge,addOrgams,setEdgeLevel
+        start,stop,pause,resume,addEdge,addOrgams,setEdgeLevel
     }
 }
 

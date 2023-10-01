@@ -20,7 +20,7 @@ const CInfo = ()=>{
     return <>
         <div style={{color:'gray',fontSize:'0.8rem'}}>
             {settingInfo != undefined && Object.keys(settingInfo).map( (key )  => {
-                return <p>{key}:{settingInfo != undefined && settingInfo[key as keyof SettingProps]}</p>
+                return <p key={"cinfo"+key}>{key}:{settingInfo != undefined && settingInfo[key as keyof SettingProps]}</p>
             })}
         </div>
     </>
