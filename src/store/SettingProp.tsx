@@ -36,7 +36,7 @@ export const BaseSettingProps = {
     RelexPeriod :10,
     PostOrgasmTortureMinPeriod: 20,
     PostOrgasmTortureMaxPeriod: 40,
-    MinBeatInput: 60,
+    MinBeatInput: 80,
     MaxBeatInput: 200,
     BeatsStepSize: 1,
     MinStrokePeriod: 4,
