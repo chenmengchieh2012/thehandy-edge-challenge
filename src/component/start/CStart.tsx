@@ -8,7 +8,7 @@ import { BeatState, StrokeAction } from "./BeatFactory"
 import { BaseRunningStatusProps, RunningStatus, ctxRunningStatusStore } from "@/store/StatusStore"
 import TimeRuner, { ExecState } from "./timeRuner"
 import StatusDecorator from "./statusDecorator"
-import { IoPauseOutline, IoPlayForwardOutline, IoPlayOutline, IoRocketOutline, IoStopOutline, IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5"
+import { IoCheckmarkSharp, IoCloseOutline, IoPauseOutline, IoPlayForwardOutline, IoPlayOutline, IoReload, IoRocketOutline, IoStopOutline, IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5"
 import CDashBoard from "./CDashboard"
 import CCacheList from "./CCacheList"
 import CLog, { FCLog } from "./CLog"
@@ -46,6 +46,7 @@ const CStart = ()=>{
     const EdgeLevelRangeInputRef = useRef<HTMLInputElement>(null)
 
     let [ forceMute, setForceMute ] = useState<boolean>(false)
+    let [ reload, setReload ] = useState<boolean>(false)
 
 
 
@@ -72,12 +73,13 @@ const CStart = ()=>{
                 return
             }
             if( currentBeat?.action == StrokeAction.Stroke || currentBeat?.action == StrokeAction.Torture ){
-                // ticktakSource.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-                // ticktakSource.src = "data:audio/mpeg;base64,//uQBAAAAowp0KUh4ABUJApaozAAjWjVgblagBGsm3Q3K1QCEcYAAH8y/HLi7kAoAABAAmJoOBwY1fOwKyChjJK/hJwtiELseguDpjZ7MDJKhigea//zTV77xSnpSmvm970pT3fv4+H78P5QMawQd/D8ocKBi6AAAAAAKL3s0R3jH1iAAQBwICJEvX4cHmmB5t8OBILEINCZE2/ixZqxZSZvMzMzO3v9F58EC7wfPlAQdEAILBBYPvEYf/lHUwf/wfB8HwfBwEAQdQOBwOBwOBwOBwMBQAAtPzIQB8DKbPA4uqyNHMRFhA1UAgCQonXBEGQCAKA4QfgAicDJAtAx6AQAQKur4Y6OQOsLQQuq/8arkIRQEgABIG//hvQBwLGSHgcAYvAOBf/+Os2RMTdROAz/zp8/gOBwOBwOBwOBwMBAAA5/yoHS+BlVygc3Xq9gNRA0DEYY8AoUgYMEoGCxB+CEVgZOKYGbxCGz/4YrECBdWGRQFAP/4NoAMB4PhD9As0BggPf/gMCQXyQ5Ib6PgVp//iUCfY0L5mQMmyl/yhtM//uSBAAAAvRZ2tY0oAZfCtt9xRQAypitABy0gAlYn+CHkoAA8IAAokbCYcEglGoTTUl2SQxCBLmT4SF75w4KGQS6Ah3N/KcfCOVDfO2UizG/5nYazmlLX/ZpEZyUMbRSl/5z2VyEyOpTGNMJKX/4IBxdxMPi4EaHA4KC6VKIo+EdlFlBQAAATBQcDgbEglGoqRCt2ObCgAvOfEh/yENN5TTW+JuiqpSmN9yUMhkMYrfio85DquUv/kOchCOQhjGzKVf+c9lcjZJSoYyGMrf/FAOeJh8XDjOHA4KC9opL4R2UXa1tf7TVsGx4pA6AiaEIImVkS4CgBFVoULNIhUGmVkTW3FWNoULPlaFDqFCzWqhUEXkIZcsiXAUAIamhQs0sKhU5YVIpRTcTfxF//QV4r4R0L+BTA1AJIkWxikFgSZWRSuOUsSq18iorYqK1DSHICpxINQ9qBYWFqZm1rhVrZtVZtVWA6BsKoULC1kg1AVOJFRVYYo6mZv/lV4uSRW1WouSRW5XhtRVuV87yqYgpqKBgASEAAIAAAAAAAAAAAAAAAA==";
-                // ticktakSource.load()
-                ticktakSource.muted = true
-                ticktakSource.play()
-                ticktakSource.muted = false
+                if(reload){
+                    ticktakSource.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+                    ticktakSource.src = "data:audio/mpeg;base64,//uQBAAAAowp0KUh4ABUJApaozAAjWjVgblagBGsm3Q3K1QCEcYAAH8y/HLi7kAoAABAAmJoOBwY1fOwKyChjJK/hJwtiELseguDpjZ7MDJKhigea//zTV77xSnpSmvm970pT3fv4+H78P5QMawQd/D8ocKBi6AAAAAAKL3s0R3jH1iAAQBwICJEvX4cHmmB5t8OBILEINCZE2/ixZqxZSZvMzMzO3v9F58EC7wfPlAQdEAILBBYPvEYf/lHUwf/wfB8HwfBwEAQdQOBwOBwOBwOBwMBQAAtPzIQB8DKbPA4uqyNHMRFhA1UAgCQonXBEGQCAKA4QfgAicDJAtAx6AQAQKur4Y6OQOsLQQuq/8arkIRQEgABIG//hvQBwLGSHgcAYvAOBf/+Os2RMTdROAz/zp8/gOBwOBwOBwOBwMBAAA5/yoHS+BlVygc3Xq9gNRA0DEYY8AoUgYMEoGCxB+CEVgZOKYGbxCGz/4YrECBdWGRQFAP/4NoAMB4PhD9As0BggPf/gMCQXyQ5Ib6PgVp//iUCfY0L5mQMmyl/yhtM//uSBAAAAvRZ2tY0oAZfCtt9xRQAypitABy0gAlYn+CHkoAA8IAAokbCYcEglGoTTUl2SQxCBLmT4SF75w4KGQS6Ah3N/KcfCOVDfO2UizG/5nYazmlLX/ZpEZyUMbRSl/5z2VyEyOpTGNMJKX/4IBxdxMPi4EaHA4KC6VKIo+EdlFlBQAAATBQcDgbEglGoqRCt2ObCgAvOfEh/yENN5TTW+JuiqpSmN9yUMhkMYrfio85DquUv/kOchCOQhjGzKVf+c9lcjZJSoYyGMrf/FAOeJh8XDjOHA4KC9opL4R2UXa1tf7TVsGx4pA6AiaEIImVkS4CgBFVoULNIhUGmVkTW3FWNoULPlaFDqFCzWqhUEXkIZcsiXAUAIamhQs0sKhU5YVIpRTcTfxF//QV4r4R0L+BTA1AJIkWxikFgSZWRSuOUsSq18iorYqK1DSHICpxINQ9qBYWFqZm1rhVrZtVZtVWA6BsKoULC1kg1AVOJFRVYYo6mZv/lV4uSRW1WouSRW5XhtRVuV87yqYgpqKBgASEAAIAAAAAAAAAAAAAAAA==";    
+                }// ticktakSource.load()
+                // ticktakSource.muted = true
+                // ticktakSource.play()
+                // ticktakSource.muted = false
                 ticktakSource.muted = forceMute ? true : false
                 // ticktakSource.pause();
                 ticktakSource.volume = 1
@@ -141,6 +143,11 @@ const CStart = ()=>{
         setForceMute(b=>!b)
     },[])
 
+
+    let doReload = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+        setReload(b=>!b)
+    },[])
+
     return <>
         <div>
             <div className={`${styles["container"]}`}>
@@ -157,6 +164,9 @@ const CStart = ()=>{
                     <div className={`${styles["running-btns"]}`}>
                         <CButton onClick={doForceMute} label={
                             forceMute ? <IoVolumeMuteOutline/> : <IoVolumeHighOutline/> 
+                        } ></CButton>
+                        <CButton onClick={doReload} label={
+                            reload ? <IoCheckmarkSharp/> : <IoCloseOutline/> 
                         } ></CButton>
                         <CButton onClick={doRun} label={<IoPlayOutline/>}/>
                         <CButton onClick={doPause} disabled={execState != ExecState.Run} label={<IoPauseOutline/>}/>
