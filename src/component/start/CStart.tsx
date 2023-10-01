@@ -33,7 +33,9 @@ const CStart = ()=>{
     },[ctxSettingProps,ctxRunningStatus])
 
     useEffect(()=>{
-        setTicktakSource(new Audio("tick-tak.mp3"))
+        let audio = new Audio()
+        audio.src = "tick-tak.mp3"
+        setTicktakSource(audio)
     },[])
     const [execState, currentBeat, cacheBeat, timeRunerAction] = TimeRuner(settingProps,runningStatusProps)
     const statusAction = StatusDecorator(ctxRunningStatus)
