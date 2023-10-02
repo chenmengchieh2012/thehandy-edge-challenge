@@ -101,7 +101,7 @@ const CStart = ()=>{
                 audioRef.current.muted = true
                 audioRef.current.pause();
             }
-        },2000*240/currentBeat.beat)
+        },Math.ceil(2000*240/currentBeat.beat))
         intervalRef.current = interval
         return reset
     },[currentBeat, execState, audioRef,forceMute])
