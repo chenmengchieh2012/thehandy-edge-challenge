@@ -10,6 +10,8 @@ import CStart from '@/component/start/CStart'
 import { useEffect } from 'react'
 import VRunningStatusContext from '@/store/StatusStore'
 import CNav from '@/component/CNav'
+import CHandyKey from '@/component/CHandyKey'
+import VHandyKeyContext from '@/store/HandyKey'
 
 export default function Home() {
 
@@ -26,12 +28,14 @@ export default function Home() {
         <VTagContext>
           <VSettingPropsContext>
           <VRunningStatusContext>
+          <VHandyKeyContext>
             <>
             <div className={`${styles["left"]}`}>
                 <CNav>
                   <>
                   <CTab icon={"IoSettingsOutline"} TagName={TagName__Setting}></CTab>
                   <CTab  icon={"IoCaretForwardOutline"} TagName={TagName__Starting}></CTab>
+                  <CHandyKey></CHandyKey>
                   <CInfo/>
                   </>
                 </CNav>
@@ -45,6 +49,7 @@ export default function Home() {
             </CTabBody>
             </div>
             </>
+          </VHandyKeyContext>
           </VRunningStatusContext>
           </VSettingPropsContext>
         </VTagContext>
