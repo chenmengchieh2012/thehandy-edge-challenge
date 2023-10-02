@@ -33,7 +33,7 @@ export const BaseSettingProps = {
     OrgamsTimes: 2,
     PreferOrgasmPeriod: 20,
     EdgeTimes: 5,
-    RelexPeriod : 10,
+    RelexPeriod : 3,
     PostOrgasmTortureMinPeriod: 20,
     PostOrgasmTortureMaxPeriod: 40,
     MinBeatInput: 60,
