@@ -23,7 +23,7 @@ const CStart = ()=>{
     let cLogRef = useRef<FCLog>(null)
 
     let [settingProps,setSettingProps] = useState<SettingProps>(BaseSettingProps)
-    let audioRef = useRef<HTMLAudioElement[]>([])
+    let audioRef = useRef<HTMLAudioElement>()
     let [runningStatusProps,setRunningStatusProps] = useState<RunningStatus>(BaseRunningStatusProps)
     useEffect(()=>{
         ctxSettingProps.registry(_props=>{
@@ -35,14 +35,9 @@ const CStart = ()=>{
     },[ctxSettingProps,ctxRunningStatus])
 
     useEffect(()=>{
-        let audios:  HTMLAudioElement[] = []
-        for(let i=0 ; i<MAXAUDIOTAG; i++){
-            let audio = new Audio()
-            // audio.src = "data:audio/mpeg;base64,//uQBAAAAowp0KUh4ABUJApaozAAjWjVgblagBGsm3Q3K1QCEcYAAH8y/HLi7kAoAABAAmJoOBwY1fOwKyChjJK/hJwtiELseguDpjZ7MDJKhigea//zTV77xSnpSmvm970pT3fv4+H78P5QMawQd/D8ocKBi6AAAAAAKL3s0R3jH1iAAQBwICJEvX4cHmmB5t8OBILEINCZE2/ixZqxZSZvMzMzO3v9F58EC7wfPlAQdEAILBBYPvEYf/lHUwf/wfB8HwfBwEAQdQOBwOBwOBwOBwMBQAAtPzIQB8DKbPA4uqyNHMRFhA1UAgCQonXBEGQCAKA4QfgAicDJAtAx6AQAQKur4Y6OQOsLQQuq/8arkIRQEgABIG//hvQBwLGSHgcAYvAOBf/+Os2RMTdROAz/zp8/gOBwOBwOBwOBwMBAAA5/yoHS+BlVygc3Xq9gNRA0DEYY8AoUgYMEoGCxB+CEVgZOKYGbxCGz/4YrECBdWGRQFAP/4NoAMB4PhD9As0BggPf/gMCQXyQ5Ib6PgVp//iUCfY0L5mQMmyl/yhtM//uSBAAAAvRZ2tY0oAZfCtt9xRQAypitABy0gAlYn+CHkoAA8IAAokbCYcEglGoTTUl2SQxCBLmT4SF75w4KGQS6Ah3N/KcfCOVDfO2UizG/5nYazmlLX/ZpEZyUMbRSl/5z2VyEyOpTGNMJKX/4IBxdxMPi4EaHA4KC6VKIo+EdlFlBQAAATBQcDgbEglGoqRCt2ObCgAvOfEh/yENN5TTW+JuiqpSmN9yUMhkMYrfio85DquUv/kOchCOQhjGzKVf+c9lcjZJSoYyGMrf/FAOeJh8XDjOHA4KC9opL4R2UXa1tf7TVsGx4pA6AiaEIImVkS4CgBFVoULNIhUGmVkTW3FWNoULPlaFDqFCzWqhUEXkIZcsiXAUAIamhQs0sKhU5YVIpRTcTfxF//QV4r4R0L+BTA1AJIkWxikFgSZWRSuOUsSq18iorYqK1DSHICpxINQ9qBYWFqZm1rhVrZtVZtVWA6BsKoULC1kg1AVOJFRVYYo6mZv/lV4uSRW1WouSRW5XhtRVuV87yqYgpqKBgASEAAIAAAAAAAAAAAAAAAA==";
-            audio.src = "tick-tak-repeat.mp3"
-            audios.push(audio)
-        }
-        audioRef.current = audios
+        let audio:  HTMLAudioElement =  new Audio()
+        audio.src = "tick-tak-repeat.mp3"
+        audioRef.current = audio
     },[])
     const [execState, currentBeat, cacheBeat, timeRunerAction] = TimeRuner(settingProps,runningStatusProps)
     const statusAction = StatusDecorator(ctxRunningStatus)
@@ -57,9 +52,10 @@ const CStart = ()=>{
    
     useEffect(()=>{
         const reset = ()=>{
-            audioRef.current.forEach(a=>{
-                a.currentTime = 10
-            })
+            if(audioRef.current == null){
+                return
+            }
+            audioRef.current.currentTime = 10
             console.log("clearInterval")
             clearInterval(intervalRef.current)
         }
@@ -71,9 +67,11 @@ const CStart = ()=>{
         if(execState == ExecState.Stop || execState == ExecState.Pause){
             return reset
         } 
-        let playIndex = 0
         
-        let playingAudio = audioRef.current[(playIndex+1)%MAXAUDIOTAG]
+        if(audioRef.current == null){
+            return
+        }
+        let playingAudio = audioRef.current
         playingAudio.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
         playingAudio.src = "tick-tak-repeat.mp3"
         playingAudio.muted = forceMute ? true : false
@@ -84,35 +82,24 @@ const CStart = ()=>{
         playingAudio.play()
 
         let interval = setInterval(()=>{
-            playIndex += 1
-            if(playIndex > MAXAUDIOTAG){
-                playIndex = 0
-            }
             console.log("play")
-            if( audioRef.current.length < MAXAUDIOTAG ){
+            if( audioRef.current == null ){
                 return
             }
             if( currentBeat?.action == StrokeAction.Stroke || currentBeat?.action == StrokeAction.Torture ){
                 console.log("currentBeat.beat/240",currentBeat.beat/240,2000*240/currentBeat.beat)
-                // ticktakSource.muted = true
-                // ticktakSource.play()
-                // ticktakSource.muted = false
-                let playingAudio = audioRef.current[(playIndex+1)%MAXAUDIOTAG]
-                let reloadAudio = audioRef.current[(playIndex)%MAXAUDIOTAG]
+                let playingAudio = audioRef.current
+                playingAudio.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+                playingAudio.src = "tick-tak-repeat.mp3"
                 playingAudio.muted = forceMute ? true : false
                 playingAudio.pause()
                 playingAudio.playbackRate= currentBeat.beat/240
                 playingAudio.volume = 1
                 playingAudio.currentTime = 0;
                 playingAudio.play()
-                reloadAudio.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-                // reloadAudio.src = "data:audio/mpeg;base64,//uQBAAAAowp0KUh4ABUJApaozAAjWjVgblagBGsm3Q3K1QCEcYAAH8y/HLi7kAoAABAAmJoOBwY1fOwKyChjJK/hJwtiELseguDpjZ7MDJKhigea//zTV77xSnpSmvm970pT3fv4+H78P5QMawQd/D8ocKBi6AAAAAAKL3s0R3jH1iAAQBwICJEvX4cHmmB5t8OBILEINCZE2/ixZqxZSZvMzMzO3v9F58EC7wfPlAQdEAILBBYPvEYf/lHUwf/wfB8HwfBwEAQdQOBwOBwOBwOBwMBQAAtPzIQB8DKbPA4uqyNHMRFhA1UAgCQonXBEGQCAKA4QfgAicDJAtAx6AQAQKur4Y6OQOsLQQuq/8arkIRQEgABIG//hvQBwLGSHgcAYvAOBf/+Os2RMTdROAz/zp8/gOBwOBwOBwOBwMBAAA5/yoHS+BlVygc3Xq9gNRA0DEYY8AoUgYMEoGCxB+CEVgZOKYGbxCGz/4YrECBdWGRQFAP/4NoAMB4PhD9As0BggPf/gMCQXyQ5Ib6PgVp//iUCfY0L5mQMmyl/yhtM//uSBAAAAvRZ2tY0oAZfCtt9xRQAypitABy0gAlYn+CHkoAA8IAAokbCYcEglGoTTUl2SQxCBLmT4SF75w4KGQS6Ah3N/KcfCOVDfO2UizG/5nYazmlLX/ZpEZyUMbRSl/5z2VyEyOpTGNMJKX/4IBxdxMPi4EaHA4KC6VKIo+EdlFlBQAAATBQcDgbEglGoqRCt2ObCgAvOfEh/yENN5TTW+JuiqpSmN9yUMhkMYrfio85DquUv/kOchCOQhjGzKVf+c9lcjZJSoYyGMrf/FAOeJh8XDjOHA4KC9opL4R2UXa1tf7TVsGx4pA6AiaEIImVkS4CgBFVoULNIhUGmVkTW3FWNoULPlaFDqFCzWqhUEXkIZcsiXAUAIamhQs0sKhU5YVIpRTcTfxF//QV4r4R0L+BTA1AJIkWxikFgSZWRSuOUsSq18iorYqK1DSHICpxINQ9qBYWFqZm1rhVrZtVZtVWA6BsKoULC1kg1AVOJFRVYYo6mZv/lV4uSRW1WouSRW5XhtRVuV87yqYgpqKBgASEAAIAAAAAAAAAAAAAAAA==";    
-                reloadAudio.src = "tick-tak-repeat.mp3"
-            }else{
-                audioRef.current.forEach(a=>{
-                    a.muted = true
-                    a.pause();
-                })
+            }else{ 
+                audioRef.current.muted = true
+                audioRef.current.pause();
             }
         },2000*240/currentBeat.beat)
         intervalRef.current = interval
