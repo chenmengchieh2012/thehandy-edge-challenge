@@ -19,7 +19,7 @@ export const MAXAUDIOTAG = 5
 const CStart = ()=>{
     let ctxSettingProps  = useContext(CtxSettingProps)
     let ctxRunningStatus  = useContext(ctxRunningStatusStore)
-    let intervalRef = useRef<NodeJS.Timeout>()
+    // let intervalRef = useRef<NodeJS.Timeout>()
     let cLogRef = useRef<FCLog>(null)
 
     let [settingProps,setSettingProps] = useState<SettingProps>(BaseSettingProps)
@@ -36,7 +36,7 @@ const CStart = ()=>{
 
     useEffect(()=>{
         let audio:  HTMLAudioElement =  new Audio()
-        audio.src = "tick-tak-repeat.mp3"
+        audio.src = "tick-tak-repeatv4.mp3"
         audioRef.current = audio
     },[])
     const [execState, currentBeat, cacheBeat, timeRunerAction] = TimeRuner(settingProps,runningStatusProps)
@@ -45,7 +45,6 @@ const CStart = ()=>{
     const EdgeLevelRangeInputRef = useRef<HTMLInputElement>(null)
 
     let [ forceMute, setForceMute ] = useState<boolean>(false)
-    let [ reload, setReload ] = useState<boolean>(false)
 
 
 
@@ -55,9 +54,9 @@ const CStart = ()=>{
             if(audioRef.current == null){
                 return
             }
-            audioRef.current.currentTime = 10
+            audioRef.current.pause()
             console.log("clearInterval")
-            clearInterval(intervalRef.current)
+            // clearInterval(intervalRef.current)
         }
         reset()
         if(currentBeat == null){
@@ -71,38 +70,44 @@ const CStart = ()=>{
         if(audioRef.current == null){
             return
         }
-        let playingAudio = audioRef.current
-        playingAudio.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-        playingAudio.src = "tick-tak-repeat.mp3"
-        playingAudio.muted = forceMute ? true : false
-        playingAudio.pause()
-        playingAudio.playbackRate= currentBeat.beat/240
-        playingAudio.volume = 1
-        playingAudio.currentTime = 0;
-        playingAudio.play()
+        if( currentBeat?.action == StrokeAction.Stroke || currentBeat?.action == StrokeAction.Torture ){
+            console.log("currentBeat.beat/200",currentBeat.beat/120,2000*120/currentBeat.beat)
+            let playingAudio = audioRef.current
+            playingAudio.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+            playingAudio.src = "tick-tak-repeatv4.mp3"
+            playingAudio.muted = forceMute ? true : false
+            playingAudio.pause()
+            playingAudio.playbackRate= currentBeat.beat/120
+            playingAudio.volume = 1
+            playingAudio.currentTime = 0;
+            playingAudio.play()
+        }else{ 
+            audioRef.current.muted = true
+            audioRef.current.pause();
+        }
 
-        let interval = setInterval(()=>{
-            console.log("play")
-            if( audioRef.current == null ){
-                return
-            }
-            if( currentBeat?.action == StrokeAction.Stroke || currentBeat?.action == StrokeAction.Torture ){
-                console.log("currentBeat.beat/240",currentBeat.beat/240,2000*240/currentBeat.beat)
-                let playingAudio = audioRef.current
-                playingAudio.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-                playingAudio.src = "tick-tak-repeat.mp3"
-                playingAudio.muted = forceMute ? true : false
-                playingAudio.pause()
-                playingAudio.playbackRate= currentBeat.beat/240
-                playingAudio.volume = 1
-                playingAudio.currentTime = 0;
-                playingAudio.play()
-            }else{ 
-                audioRef.current.muted = true
-                audioRef.current.pause();
-            }
-        },Math.ceil(2000*240/currentBeat.beat))
-        intervalRef.current = interval
+        // let interval = setInterval(()=>{
+        //     console.log("play")
+        //     if( audioRef.current == null ){
+        //         return
+        //     }
+        //     if( currentBeat?.action == StrokeAction.Stroke || currentBeat?.action == StrokeAction.Torture ){
+        //         console.log("currentBeat.beat/200",currentBeat.beat/200,2000*200/currentBeat.beat)
+        //         let playingAudio = audioRef.current
+        //         playingAudio.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+        //         playingAudio.src = "tick-tak-repeatv2.mp3"
+        //         playingAudio.muted = forceMute ? true : false
+        //         playingAudio.pause()
+        //         playingAudio.playbackRate= currentBeat.beat/200
+        //         playingAudio.volume = 1
+        //         playingAudio.currentTime = 0;
+        //         playingAudio.play()
+        //     }else{ 
+        //         audioRef.current.muted = true
+        //         audioRef.current.pause();
+        //     }
+        // },Math.ceil(216000*220/currentBeat.beat))
+        // intervalRef.current = interval
         return reset
     },[currentBeat, execState, audioRef,forceMute])
 
@@ -156,9 +161,9 @@ const CStart = ()=>{
     },[])
 
 
-    let doReload = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
-        setReload(b=>!b)
-    },[])
+    // let doReload = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
+    //     setReload(b=>!b)
+    // },[])
 
     return <>
         <div>
