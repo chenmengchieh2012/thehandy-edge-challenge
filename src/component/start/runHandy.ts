@@ -1,6 +1,6 @@
 import { useContext, useDeferredValue, useEffect, useState } from "react";
 import { BeatState } from "./BeatFactory";
-import { API__SetHandySlide, API__SetHandyStartStroke, API__SetHandyStopStroke, API__SetHandyVelocity } from "@/api/handy";
+import { API__GetHandyState, API__SetHandySlide, API__SetHandyStartStroke, API__SetHandyStopStroke, API__SetHandyVelocity } from "@/api/handy";
 import { CtxHandyKeyStore } from "@/store/HandyKey";
 import { CtxSettingProps } from "@/store/SettingProp";
 
@@ -21,12 +21,12 @@ const RunHandy = (currentBeat: BeatState|null): fRunHandy=>{
     const deferPosition = useDeferredValue(position)
     const [handyKey ,setHandyKey ] = useState<string>("")
     useEffect(()=>{
-
         ctxHandyKey.registry((handyKey)=>{
             setHandyKey(handyKey)
         })
     },[ctxHandyKey])
     useEffect(()=>{
+        console.log("runHandyts ",currentBeat)
         let settingProps = ctxSettingProps.getSettingProps()
         if(settingProps == null){
             return 
@@ -40,11 +40,19 @@ const RunHandy = (currentBeat: BeatState|null): fRunHandy=>{
                 console.log(" run handy")
             })
         }else if( currentBeat.beat > 0){
-            let percentage = Math.trunc(currentBeat.beat/settingProps.MaxBeatInput)
-            API__SetHandyVelocity(handyKey,percentage)
+            let percentage = Math.trunc(100*(currentBeat.beat/settingProps.MaxBeatInput))
+            API__GetHandyState(handyKey)
+            .then((successed)=>{
+                console.log("success: ",successed)
+                if(!successed){
+                    return API__SetHandyStartStroke(handyKey)
+                }else{
+                    return true
+                }
+            })
             .then((successed)=>{
                 if(successed){
-                    return API__SetHandyStartStroke(handyKey)
+                    return API__SetHandyVelocity(handyKey,percentage)
                 }
             })
             .then((successed)=>{

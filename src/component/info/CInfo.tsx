@@ -42,12 +42,12 @@ const CInfo = ()=>{
                 })
         }
         if(deferHandyKey != "" && handyConnectResult == false){
-            let interval = setInterval(loopForConnectCheck,1000)
+            let interval = setInterval(loopForConnectCheck,2000)
             return ()=>{
                 clearInterval(interval)
             }
         }
-    },[deferHandyKey])
+    },[deferHandyKey, handyConnectResult])
 
 
     useEffect(()=>{
