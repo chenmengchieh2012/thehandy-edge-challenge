@@ -8,7 +8,7 @@ import { BeatState, StrokeAction } from "./BeatFactory"
 import { BaseRunningStatusProps, RunningStatus, ctxRunningStatusStore } from "@/store/StatusStore"
 import TimeRuner, { ExecState } from "./timeRuner"
 import StatusDecorator from "./statusDecorator"
-import { IoCheckmarkSharp, IoCloseOutline, IoPauseOutline, IoPlayForwardOutline, IoPlayOutline, IoReload, IoRocketOutline, IoStopOutline, IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5"
+import { IoCheckmarkSharp, IoCloseOutline, IoPauseOutline, IoPlayForwardOutline, IoPlayOutline, IoReload, IoRocketOutline, IoStopOutline, IoSwapHorizontalOutline, IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5"
 import CDashBoard from "./CDashboard"
 import CCacheList from "./CCacheList"
 import CLog, { FCLog } from "./CLog"
@@ -202,40 +202,46 @@ const CStart = ()=>{
                         className={`${styles["edge-level"]}`} type="range" 
                         max={8} min={1} onChange={doChangeEdgeLevel} 
                         inputRef={EdgeLevelRangeInputRef} 
+                        labelInline={true}
                         label={<IoRocketOutline/>} >
                     </CInput>
                 </div>
                 <div className={`${styles["row"]}`}>
-                    <Range 
-                        step={0.1}
-                        min={0}
-                        max={100}
-                        values={[position.min,position.max]}
-                        onChange={doResetRangeOfHandySlide} 
-                        renderTrack={({ props, children }) => (
-                            <div
-                              {...props}
-                              style={{
-                                ...props.style,
-                                height: '6px',
-                                width: '100%',
-                                backgroundColor: '#ccc'
-                              }}
-                            >
-                              {children}
-                            </div>
-                          )}
-                          renderThumb={({ props }) => (
-                            <div
-                              {...props}
-                              style={{
-                                ...props.style,
-                                height: '10px',
-                                width: '10px',
-                                backgroundColor: '#999'
-                              }}
-                            />
-                        )}                  />
+                    <div  className={`${styles["stroke-position"]}`}>
+                        <label><IoSwapHorizontalOutline/></label>
+                        <div>
+                            <Range 
+                                step={0.1}
+                                min={0}
+                                max={100}
+                                values={[position.min,position.max]}
+                                onChange={doResetRangeOfHandySlide} 
+                                renderTrack={({ props, children }) => (
+                                    <div
+                                    {...props}
+                                    style={{
+                                        ...props.style,
+                                        height: '6px',
+                                        width: '100%',
+                                        backgroundColor: '#ccc'
+                                    }}
+                                    >
+                                    {children}
+                                    </div>
+                                )}
+                                renderThumb={({ props }) => (
+                                    <div
+                                    {...props}
+                                    style={{
+                                        ...props.style,
+                                        height: '10px',
+                                        width: '10px',
+                                        backgroundColor: '#999'
+                                    }}
+                                    />
+                                )}                  />
+                        </div>
+                    </div>
                 </div>
             </div>
             <div className={`${styles["body"]}`}>

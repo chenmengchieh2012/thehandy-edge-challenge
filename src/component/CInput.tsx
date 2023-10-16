@@ -13,7 +13,7 @@ const CInput = (props: CInputProps)=>{
     delete(inputProps.inputRef)
     return <>
         <div className={`${props.className} ${styles["cinput"]}`} style={{display:`${props.labelInline ? "flex" : "block"}`}} >
-            <label style={{flex:`${props.labelInline ? "1" : "0"}`}}>
+            <label>
                 {props.label}
             </label>
             <input {...inputProps} ref={props.inputRef} style={{flex:`${props.labelInline ? "1" : "0"}`}}></input>

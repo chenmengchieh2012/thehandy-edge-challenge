@@ -62,3 +62,18 @@
     padding:0.5rem 1rem;
     margin-right: 0.3rem;
 }
+
+.stroke-position{
+    display: flex;
+    width: 100%;
+}
+
+.stroke-position>label{
+    display: block;
+    flex: 0;
+    padding: 8px;
+}
+.stroke-position>div{
+    flex: 1;
+    padding: 12px;
+}
