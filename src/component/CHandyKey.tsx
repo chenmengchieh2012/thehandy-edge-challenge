@@ -14,9 +14,9 @@ const CHandyKey = ()=>{
     },[])
     useEffect(()=>{
         ctxHandyKey.setHandyKey(handyKey)
-    },[handyKey])
+    },[ctxHandyKey, handyKey])
     return <>
-    <CInput onChange={onChangeHandyKey} inline={true} label={<IoKeyOutline/>} inputRef={null}></CInput>
+    <CInput onChange={onChangeHandyKey} labelInline={true} label={<IoKeyOutline/>} inputRef={null}></CInput>
     </>
 }
 

@@ -12,7 +12,9 @@ import { IoCheckmarkSharp, IoCloseOutline, IoPauseOutline, IoPlayForwardOutline,
 import CDashBoard from "./CDashboard"
 import CCacheList from "./CCacheList"
 import CLog, { FCLog } from "./CLog"
-
+import RunHandy, { fRunHandy } from "./runHandy"
+import { Range } from 'react-range';
+import { IRenderThumbParams, IRenderTrackParams } from "react-range/lib/types"
 
 export const MAXAUDIOTAG = 5
 
@@ -45,7 +47,7 @@ const CStart = ()=>{
     const EdgeLevelRangeInputRef = useRef<HTMLInputElement>(null)
 
     let [ forceMute, setForceMute ] = useState<boolean>(false)
-
+    const {setPosition,position} = RunHandy(currentBeat)
 
 
    
@@ -160,6 +162,10 @@ const CStart = ()=>{
         setForceMute(b=>!b)
     },[])
 
+    let doResetRangeOfHandySlide = useCallback((values: number[])=>{
+        console.log("doResetRangeOfHandySlide",values)
+        setPosition(values[0],values[1])
+    },[setPosition])
 
     // let doReload = useCallback((e: React.MouseEvent<HTMLButtonElement>)=>{
     //     setReload(b=>!b)
@@ -198,6 +204,38 @@ const CStart = ()=>{
                         inputRef={EdgeLevelRangeInputRef} 
                         label={<IoRocketOutline/>} >
                     </CInput>
+                </div>
+                <div className={`${styles["row"]}`}>
+                    <Range 
+                        step={0.1}
+                        min={0}
+                        max={100}
+                        values={[position.min,position.max]}
+                        onChange={doResetRangeOfHandySlide} 
+                        renderTrack={({ props, children }) => (
+                            <div
+                              {...props}
+                              style={{
+                                ...props.style,
+                                height: '6px',
+                                width: '100%',
+                                backgroundColor: '#ccc'
+                              }}
+                            >
+                              {children}
+                            </div>
+                          )}
+                          renderThumb={({ props }) => (
+                            <div
+                              {...props}
+                              style={{
+                                ...props.style,
+                                height: '10px',
+                                width: '10px',
+                                backgroundColor: '#999'
+                              }}
+                            />
+                        )}                  />
                 </div>
             </div>
             <div className={`${styles["body"]}`}>

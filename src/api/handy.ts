@@ -1,5 +1,6 @@
 'use server'
 
+import { BeatState } from "@/component/start/BeatFactory"
 import { Handy__ProductionHost } from "./utils"
 
 export  const API__CheckHandyConnect = async (xConnectedKey: string)=>{
@@ -13,7 +14,7 @@ export  const API__CheckHandyConnect = async (xConnectedKey: string)=>{
         if( ret.status == 200){
             return ret.json()
         }else{
-            throw new Error("not found server")
+            throw new Error("status: "+ret.status)
         }
     }).then(jsonObj=>{
         console.log("connected result: ", jsonObj)
@@ -23,8 +24,132 @@ export  const API__CheckHandyConnect = async (xConnectedKey: string)=>{
             return false
         }
     }).catch(e=>{
-        console.log("server not connect",e)
+        console.log("err: ",e)
         return false
     })
     return connected
+}
+
+
+export  const API__SetHandyStrokeMode = async (xConnectedKey: string)=>{
+    console.log(`${Handy__ProductionHost}/mode`)
+    let modeSuccessed = await fetch(`${Handy__ProductionHost}/mode`, {
+        headers: {
+            "X-Connection-Key": xConnectedKey,
+            "Content-Type": "application/json;",
+        },
+        method: "PUT",
+        body: JSON.stringify({
+            "mode": 0,
+        }),
+    }).then(ret=>{
+        if( ret.status == 200){
+            return ret.json()
+        }else{
+            throw new Error("status: "+ret.status)
+        }
+    }).then(jsonObj=>{
+        return true
+    }).catch(e=>{
+        console.log("err: ",e)
+        return false
+    })
+    return modeSuccessed
+}
+
+
+export  const API__SetHandyVelocity = async (xConnectedKey: string, velocity: number)=>{
+    console.log(`${Handy__ProductionHost}/hamp/velocity`)
+    let modeSuccessed = await fetch(`${Handy__ProductionHost}/hamp/velocity`, {
+        headers: {
+            "X-Connection-Key": xConnectedKey,
+            "Content-Type": "application/json;",
+        },
+        method: "PUT",
+        body: JSON.stringify({
+            "velocity": velocity,
+        }),
+    }).then(ret=>{
+        if( ret.status == 200){
+            return ret.json()
+        }else{
+            throw new Error("status: "+ret.status)
+        }
+    }).then(jsonObj=>{
+        return true
+    }).catch(e=>{
+        console.log("err: ",e)
+        return false
+    })
+    return modeSuccessed
+}
+
+export  const API__SetHandyStartStroke = async (xConnectedKey: string)=>{
+    console.log(`${Handy__ProductionHost}/hamp/start`)
+    let modeSuccessed = await fetch(`${Handy__ProductionHost}/hamp/start`, {
+        headers: {
+            "X-Connection-Key": xConnectedKey,
+        },
+        method: "PUT"
+    }).then(ret=>{
+        if( ret.status == 200){
+            return ret.json()
+        }else{
+            throw new Error("status: "+ret.status)
+        }
+    }).then(jsonObj=>{
+        return true
+    }).catch(e=>{
+        console.log("err: ",e)
+        return false
+    })
+    return modeSuccessed
+}
+export  const API__SetHandyStopStroke = async (xConnectedKey: string)=>{
+    console.log(`${Handy__ProductionHost}/hamp/stop`)
+    let modeSuccessed = await fetch(`${Handy__ProductionHost}/hamp/stop`, {
+        headers: {
+            "X-Connection-Key": xConnectedKey,
+        },
+        method: "PUT"
+    }).then(ret=>{
+        if( ret.status == 200){
+            return ret.json()
+        }else{
+            throw new Error("status: "+ret.status)
+        }
+    }).then(jsonObj=>{
+        return true
+    }).catch(e=>{
+        console.log("err: ",e)
+        return false
+    })
+    return modeSuccessed
+}
+
+export  const API__SetHandySlide = async (xConnectedKey: string, max: number ,min: number)=>{
+    console.log(`${Handy__ProductionHost}/slide`)
+    let modeSuccessed = await fetch(`${Handy__ProductionHost}/slide`, {
+        headers: {
+            "X-Connection-Key": xConnectedKey,
+            "Content-Type": "application/json;",
+        },
+        method: "PUT",
+        body:JSON.stringify({
+            "min": min,
+            "max": max
+        })
+    }).then(ret=>{
+        if( ret.status == 200){
+            return ret.json()
+        }else{
+            throw new Error("" + ret.status)
+        }
+    }).then(jsonObj=>{
+        return true
+    }).catch(e=>{
+        console.log("err: ",e)
+        return false
+    })
+    return modeSuccessed
 }

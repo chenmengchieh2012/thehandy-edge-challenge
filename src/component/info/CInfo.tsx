@@ -1,6 +1,6 @@
 'use client'
 
-import { API__CheckHandyConnect } from "@/api/handy"
+import { API__CheckHandyConnect, API__SetHandyStrokeMode } from "@/api/handy"
 import { CtxHandyKeyStore } from "@/store/HandyKey"
 import { CtxSettingProps, SettingProps } from "@/store/SettingProp"
 import { useContext, useDeferredValue, useEffect, useState } from "react"
@@ -16,11 +16,36 @@ const CInfo = ()=>{
     let [ handyConnectResult, setHandyConnectResult ] = useState<boolean>(false)
 
     useEffect(()=>{
-        if(deferHandyKey != ""){
+        const loopForConnectCheck = ()=>{
+            if(deferHandyKey == ""){
+                return 
+            }
             API__CheckHandyConnect(deferHandyKey)
                 .then(isConnect=>{
-                    setHandyConnectResult(isConnect)
+                    if(isConnect && handyConnectResult == false){
+                        setHandyConnectResult(isConnect)
+                        return API__SetHandyStrokeMode(deferHandyKey)
+                    }else if(!isConnect && handyConnectResult == true){
+                        setHandyConnectResult(isConnect)
+                        throw new Error("not connect")
+                    }else{
+                        throw new Error("not connect")
+                    }
                 })
+                .then(()=>{
+                    if(handyConnectResult == false){
+                        console.log("set mode OK")
+                    }
+                })
+                .catch(e=>{
+                    console.log("not connected")
+                })
+        }
+        if(deferHandyKey != "" && handyConnectResult == false){
+            let interval = setInterval(loopForConnectCheck,1000)
+            return ()=>{
+                clearInterval(interval)
+            }
         }
     },[deferHandyKey])
 

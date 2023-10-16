@@ -10,11 +10,12 @@
   },
   "dependencies": {
     "chart.js": "^4.4.0",
-    "next": "latest",
+    "next": "^13.5.4",
     "react": "latest",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "latest",
-    "react-icons": "^4.11.0"
+    "react-icons": "^4.11.0",
+    "react-range": "^1.8.14"
   },
   "devDependencies": {
     "@types/node": "latest",

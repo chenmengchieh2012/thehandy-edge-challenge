@@ -2,17 +2,21 @@ import { InputHTMLAttributes } from "react"
 import styles from "./CInput.module.css"
 export interface CInputProps extends React.InputHTMLAttributes<HTMLInputElement>{
     label: any
-    inline?: boolean
+    labelInline?: boolean
     className?: string
     inputRef: React.Ref<HTMLInputElement>
 }
 const CInput = (props: CInputProps)=>{
+    
+    let inputProps = Object.assign({...props})
+    delete(inputProps.labelInline)
+    delete(inputProps.inputRef)
     return <>
-        <div className={`${props.className} ${styles["cinput"]}`} style={{display:`${props.inline ? "flex" : "block"}`}} >
-            <label style={{flex:`${props.inline ? "1" : "0"}`}}>
+        <div className={`${props.className} ${styles["cinput"]}`} style={{display:`${props.labelInline ? "flex" : "block"}`}} >
+            <label style={{flex:`${props.labelInline ? "1" : "0"}`}}>
                 {props.label}
             </label>
-            <input {...props} ref={props.inputRef} style={{flex:`${props.inline ? "1" : "0"}`}}></input>
+            <input {...inputProps} ref={props.inputRef} style={{flex:`${props.labelInline ? "1" : "0"}`}}></input>
         </div>
     </>
 }
